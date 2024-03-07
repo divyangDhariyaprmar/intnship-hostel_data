@@ -17,6 +17,7 @@ class _MYhomepageState extends State<MYhomepage> {
   var name =TextEditingController();
   var Password =TextEditingController();
   var alert ='';
+  var welcome = 'welcome';
 
 
   @override
@@ -25,7 +26,7 @@ class _MYhomepageState extends State<MYhomepage> {
   Widget build(BuildContext context) {
     return Scaffold(
 
-        appBar: AppBar(title:Text('welcome')),
+        appBar: AppBar(title: Text('$welcome')),
         body:Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

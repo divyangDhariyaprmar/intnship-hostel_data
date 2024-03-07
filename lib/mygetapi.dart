@@ -14,12 +14,23 @@ class getapi extends StatefulWidget{
 
   State<getapi> createState() => _getapiState();
 }
-
 class _getapiState extends State<getapi> {
+
+  late Future<Getmodal> _futureData;
+  late List _dataList = [];
+  late TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _futureData = getdata();
+    _searchController = TextEditingController();
+  }
 
  var year ="2024";
  var abc;
  var find;
+ bool searchshow=true;
   bool sort =true;
   bool more=true;
   DateTime date=DateTime.now().toLocal();
@@ -69,20 +80,41 @@ class _getapiState extends State<getapi> {
         padding: const EdgeInsets.all(0.0),
         child: Column(
           children: [
+            Visibility(
+              visible:searchshow,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  controller: _searchController,
+                  onChanged: (value) {
+                    setState(() {});
+                    // Trigger rebuild on every change
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'Search by Search by First Name',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+            ),
             Expanded(
               child:
               FutureBuilder<Getmodal>(
-                future: getdata(),
+                future: _futureData,
+
                 builder: (context , snapshot){
                   if(snapshot.hasData){
+                    _dataList = snapshot.data!.response ?? [];
                     return
                       ListView.builder(
                         controller: scrollController,
-                          itemCount: snapshot.data!.response!.length,
+                          itemCount: _filteredData.length,
                           itemBuilder: (context, index){
                             //sort data in firstname
                             sort?snapshot.data!.response!.sort((a, b) => b.firstName.toString().compareTo(a.firstName.toString())):
-                            snapshot.data!.response!.sort((a, b) => a.firstName.toString().compareTo(b.firstName.toString()));
+                            snapshot.data!.response!.sort((a, b) => a.firstName.toString().
+                            compareTo(b.firstName.toString()));
+
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 8),
                               child: InkWell(
@@ -104,7 +136,7 @@ class _getapiState extends State<getapi> {
                                       Row(
                                         children: [
                                           CircleAvatar(
-                                            child: Text(snapshot.data!.response![index].registrationMainId.toString(),
+                                            child: Text(_filteredData[index].registrationMainId.toString(),
                                               style: TextStyle(color: Colors.black)),
                                           backgroundColor: Colors.blue.shade50,
                                           ),
@@ -136,25 +168,28 @@ class _getapiState extends State<getapi> {
                                                 padding:more? EdgeInsets.only(left:10.0):EdgeInsets.only(left:60.0),
                                                 child: Column(
                                                   children: [
+
                                                   Text('FirstName ', style: TextStyle(color:Colors.blue,fontSize: 17 , fontWeight: FontWeight.bold),),
                                                   SizedBox(height: 3,),
-                                                    snapshot.data!.response![index].firstName.toString().isEmpty
-                                                        ? Text('Null') :Text(snapshot.data!.response![index].firstName.toString(),
-                                                      style: TextStyle(fontSize:17)),
+                                                    _filteredData[index].firstName.toString().isEmpty
+                                                        ? Text('Null') :
+                            Text(_filteredData[index].firstName.toString(),
+
+                            style: TextStyle(fontSize:17)),
                                                     SizedBox(height: 5,),
                                                     Visibility(
                                                     child: Column(children: [
                                                       Text('Middle Name' ,
                                                         style: TextStyle(color:Colors.blue,fontSize: 17 , fontWeight: FontWeight.bold),),
                                                       SizedBox(height: 3,),
-                                                      snapshot.data!.response![index].middleName.toString().isEmpty ? Text('Null'):
-                                                      Text(snapshot.data!.response![index].middleName.toString(),
+                                                      _filteredData[index].middleName.toString().isEmpty ? Text('Null'):
+                                                      Text(_filteredData[index].middleName.toString(),
                                                           style: TextStyle(fontSize:17)),
                                                       SizedBox(height: 5,),
                                                       Text('Last name' ,
                                                         style: TextStyle(color:Colors.blue,fontSize: 17 , fontWeight: FontWeight.bold),),
                                                       SizedBox(height: 3,),
-                                                      snapshot.data!.response![index].lastName.toString().isEmpty ? Text('Null') : Text(snapshot.data!.response![index].lastName.toString(),
+                                                      _filteredData[index].lastName.toString().isEmpty ? Text('Null') : Text(snapshot.data!.response![index].lastName.toString(),
                             style: TextStyle(fontSize:17)),
                                                     ],),
                                                     visible:more,
@@ -181,18 +216,15 @@ class _getapiState extends State<getapi> {
                                                       snapshot.data!.response![index].phoneCountryCode.toString().isEmpty  ?
                                                       Text('Null'):Text(snapshot.data!.response![index].phoneCountryCode.toString(),style: TextStyle(fontSize:17)),
                                                       SizedBox(height: 7,),
-
-
-
                                                       Text(' phone Number' , style: TextStyle(color:Colors.blue,fontSize: 17 , fontWeight: FontWeight.bold),),
                                                       SizedBox(height: 3,),
-                                                      Text(snapshot.data!.response![index].phoneNumber.toString(),style: TextStyle(fontSize:17)),
+                                                      Text(_filteredData[index].phoneNumber.toString(),style: TextStyle(fontSize:17)),
 
                                                       SizedBox(height: 5),
                                                       snapshot.data!.response![index].phoneCountryCode.toString().isEmpty? Text('Null') :
                                                       Text('Email' , style: TextStyle(color:Colors.blue,fontSize: 17 , fontWeight: FontWeight.bold),),
                                                       SizedBox(height: 3,),
-                                                      Text(snapshot.data!.response![index].email.toString(),style: TextStyle(fontSize:17)),
+                                                      Text(_filteredData[index].email.toString(),style: TextStyle(fontSize:17)),
 
 
                                                     ],
@@ -208,13 +240,12 @@ class _getapiState extends State<getapi> {
                                       ) : Center(child: Column(
                                         children: [
                                           Text("FirstName",style: TextStyle(color:Colors.blue,fontSize: 17 , fontWeight: FontWeight.bold)),
-                                          Text(snapshot.data!.response![index].firstName.toString()),
+                                          Text(_filteredData[index].firstName.toString()),
                                         ],
                                       )),
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                                         children: [
-
                                           snapshot.data!.response![index].createdTime.toString().substring(0,4)==date.year.toString() &&
                                               int.parse(snapshot.data!.response![index].createdTime.toString().substring(5,7)) ==date.month &&
                                               int.parse(snapshot.data!.response![index].createdTime.toString().substring(8,10)) >= date.day-2
@@ -303,6 +334,18 @@ class _getapiState extends State<getapi> {
       ),
    );
   }
+
+  //search in list function
+  List get _filteredData {
+    final query = _searchController.text.toLowerCase();
+    return _dataList.where((data) {
+      return data.firstName.toString().toLowerCase().contains(query)||
+          data.middleName.toString().toLowerCase().contains(query)||
+          data.lastName.toString().toLowerCase().contains(query);
+    }).toList();
+  }
+
+//delete function
   Future<void>delete(data)async{
     try{
       final reponsep =await http.post(Uri.parse("https://glexas.com/hostel_data/API/raj/new_admission_delete.php")
